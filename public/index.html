@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot</title>
+  <style>
+    /* Fondo oscuro para toda la página */
+    body {
+      background-color: #121212; /* Fondo oscuro */
+      color: #FFFFFF; /* Texto claro */
+      font-family: Arial, sans-serif;
+      text-align: center; /* Centrar texto */
+    }
+
+    /* Caja donde aparecen los mensajes */
+    #chat-box {
+      border: 1px solid #444;
+      padding: 10px;
+      margin: 0 auto 15px auto;
+      height: 500px;
+      width: 90%;
+      max-width: 1400px;
+      overflow-y: scroll;
+      background-color: #1e1e1e;
+      color: #FFFFFF;
+      text-align: left; /* Alinear texto a la izquierda */
+    }
+
+    /* Estilo de los mensajes del usuario */
+    .user {
+      color: #4da6ff; /* azul claro */
+      margin-bottom: 8px;
+    }
+
+    /* Estilo de los mensajes del bot */
+    .bot {
+      color: #90ee90; /* verde claro */
+      margin-bottom: 8px;
+    }
+
+    /* Contenedor para entrada de texto y botón */
+    .input-container {
+      display: flex;
+      gap: 15px;
+      width: 90%;
+      max-width: 800px;
+      margin: 62px auto; /* Centrado horizontal */
+    }
+
+    /* Entrada de texto */
+    #input-box {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: 1px solid #555;
+      background-color: #2c2c2c;
+      color: #fff;
+    }
+
+    /* Botón de enviar */
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Chatbot</h1>
+  <div id="chat-box"></div>
+  <div class="input-container">
+    <input type="text" id="input-box" placeholder="Escribe tu mensaje...">
+    <button onclick="sendMessage()">Enviar</button>
+  </div>
+
+  <script>
+    // Obtener la respuesta inicial del bot al cargar la página
+    window.onload = async () => {
+      const response = await fetch('/initial-message', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await response.json();
+      if (data.response) {
+        const chatBox = document.getElementById('chat-box');
+        chatBox.innerHTML += '<div class="message bot">Bot: ' + data.response + '</div>';
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+    };
+
+    // Enviar mensaje del usuario
+    async function sendMessage() {
+      const inputBox = document.getElementById('input-box');
+      const chatBox = document.getElementById('chat-box');
+      const message = inputBox.value;
+      if (!message) return;
+
+      // Mostrar mensaje del usuario
+      chatBox.innerHTML += '<div class="message user">Usuario: ' + message + '</div>';
+      inputBox.value = '';
+
+      // Enviar mensaje al servidor
+      const response = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message })
+      });
+      const data = await response.json();
+
+      // Mostrar respuesta del bot
+      chatBox.innerHTML += '<div class="message bot">Bot: ' + data.response + '</div>';
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Permitir enviar mensaje con la tecla Enter
+    document.getElementById('input-box').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+</body>
+</html>
