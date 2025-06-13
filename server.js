@@ -10,6 +10,9 @@ const {
   initializeConversation
 } = require('./utils');
 
+// NUEVO: Importar el módulo os para obtener la IP de la máquina
+const os = require('os');
+
 const app = express();
 const port = 3000;
 
@@ -120,8 +123,35 @@ app.post('/update-prompt', restrictToLocalhost, (req, res) => {
   res.json({ message: 'Prompt inicial actualizado correctamente.' });
 });
 
+// NUEVO: Obtener IP automáticamente
+// MODIFICADO: Obtener IP automáticamente
+// Función para obtener la dirección IPv4 de la máquina (no localhost)
+function getServerIp() {
+  // Obtener todas las interfaces de red
+  const interfaces = os.networkInterfaces();
+  // Iterar sobre todas las interfaces
+  for (const ifaceName in interfaces) {
+    // Buscar una dirección IPv4 no interna
+    const iface = interfaces[ifaceName].find(
+      addr => addr.family === 'IPv4' && !addr.internal
+    );
+    // Devolver la primera dirección IPv4 no interna encontrada
+    if (iface) {
+      return iface.address;
+    }
+  }
+  // Fallback: devolver null si no se encuentra una IP adecuada
+  return null;
+}
+
 // Iniciar el servidor
 app.listen(port, '0.0.0.0', () => {
-  console.log(`Server listening at http://0.0.0.0:${port}`);
+  // NUEVO: Mostrar la IP del servidor en la consola
+  const serverIp = getServerIp();
+  if (serverIp) {
+    console.log(`Server listening at http://${serverIp}:${port}`);
+  } else {
+    console.log(`Server listening at http://<IP>:${port} (no se pudo detectar la IP automáticamente)`);
+  }
   console.log(`Prompt configuration page available at http://localhost:${port}/profe`);
 });
