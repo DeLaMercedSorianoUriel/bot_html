@@ -8,8 +8,10 @@ const modelName = 'gemini-2.0-flash';
 
 // Carpeta para guardar historiales
 const chatLogsDir = path.join(__dirname, 'chat_logs');
+// NUEVO: Asegurar que la carpeta chat_logs exista antes de usarla
 if (!fs.existsSync(chatLogsDir)) {
   fs.mkdirSync(chatLogsDir, { recursive: true });
+  console.log(`Carpeta ${chatLogsDir} creada.`);
 }
 
 // Función para generar respuesta de Gemini
@@ -60,8 +62,9 @@ function formatGeminiResponse(responseText) {
 }
 
 // Guarda el historial de la conversación en un archivo
-function saveChatHistoryToFile(sessionId, history) {
-  const filename = path.join(chatLogsDir, `chat_${sessionId}.txt`);
+function saveChatHistoryToFile(sessionId, history, customFilename) {
+  // NUEVO: Usar la ruta absoluta con chatLogsDir y el nombre personalizado
+  const filename = customFilename ? path.join(chatLogsDir, customFilename) : path.join(chatLogsDir, `chat_${sessionId}.txt`);
   let fileContent = '';
 
   history.forEach(message => {
@@ -74,7 +77,7 @@ function saveChatHistoryToFile(sessionId, history) {
 }
 
 // Inicializa la conversación con el prompt inicial
-async function initializeConversation(sessionId, conversationHistory, initialPrompt) {
+async function initializeConversation(sessionId, conversationHistory, initialPrompt, customFilename) {
   if (!conversationHistory[sessionId]) {
     conversationHistory[sessionId] = [];
     // Agregar el prompt inicial como mensaje del usuario
@@ -84,8 +87,8 @@ async function initializeConversation(sessionId, conversationHistory, initialPro
     const botResponse = formatGeminiResponse(rawResponse);
     // Agregar respuesta del bot al historial
     conversationHistory[sessionId].push({ role: 'model', content: rawResponse });
-    // Guardar historial
-    saveChatHistoryToFile(sessionId, conversationHistory[sessionId]);
+    // NUEVO: Asegurar que el guardado use la carpeta chat_logs con el nombre personalizado
+    saveChatHistoryToFile(sessionId, conversationHistory[sessionId], customFilename);
     return botResponse;
   }
   return null;
