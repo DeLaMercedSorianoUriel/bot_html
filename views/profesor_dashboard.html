@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard del Profesor</title>
+  <style>
+    body { font-family: sans-serif; line-height: 1.6; margin: 2em; }
+    hr { margin: 2em 0; }
+    textarea { width: 80%; max-width: 600px; }
+    #status-message { transition: opacity 0.5s; }
+  </style>
+</head>
+<body>
+  <h1>Panel de Control del Profesor</h1>
+  <a href="/auth/logout">Cerrar Sesión</a>
+  
+  <hr>
+  
+  <h2>Configurar Prompt Inicial del Chatbot</h2>
+  <div id="prompt-container">
+    <textarea id="prompt-input" rows="5" cols="80" placeholder="Escribe aquí el comportamiento inicial del bot..."></textarea>
+    <br>
+    <button onclick="updatePrompt()">Actualizar Prompt</button>
+    <p id="status-message" style="color: green;"></p>
+  </div>
+
+  <hr>
+
+  <h2>Logs de Chats de Alumnos</h2>
+  <ul id="log-list">
+    </ul>
+
+  <script>
+    // Cargar la lista de logs al iniciar la página
+    window.onload = async () => {
+      try {
+        const response = await fetch('/profesor/logs');
+        if (!response.ok) throw new Error('Error en la respuesta del servidor');
+        
+        const files = await response.json();
+        const list = document.getElementById('log-list');
+
+        if (files.length === 0) {
+          list.innerHTML = '<li>No hay logs disponibles.</li>';
+        } else {
+          files.forEach(file => {
+            const listItem = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = `/profesor/logs/${file}`;
+            link.textContent = file;
+            link.setAttribute('download', ''); // Sugiere al navegador que descargue
+            listItem.appendChild(link);
+            list.appendChild(listItem);
+          });
+        }
+      } catch (error) {
+        console.error('Error al cargar los logs:', error);
+        document.getElementById('log-list').innerHTML = '<li>Error al cargar los logs.</li>';
+      }
+    };
+
+    // Función para actualizar el prompt
+    async function updatePrompt() {
+      const newPrompt = document.getElementById('prompt-input').value;
+      const statusMessage = document.getElementById('status-message');
+
+      try {
+        const response = await fetch('/profesor/update-prompt', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ newPrompt }),
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          statusMessage.textContent = data.message;
+          statusMessage.style.color = 'green';
+        } else {
+          statusMessage.textContent = `Error: ${data.error}`;
+          statusMessage.style.color = 'red';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        statusMessage.textContent = 'Error de conexión.';
+        statusMessage.style.color = 'red';
+      } finally {
+         // Oculta el mensaje después de 3 segundos
+        setTimeout(() => {
+          statusMessage.textContent = '';
+        }, 3000);
+      }
+    }
+  </script>
+</body>
+</html>

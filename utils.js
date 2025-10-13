@@ -10,7 +10,7 @@ const apiKey = process.env.GEMINI_API_KEY;
 const modelName = 'gemini-2.0-flash';
 
 // Carpeta para guardar historiales
-const chatLogsDir = path.join(__dirname, 'chat_logs');
+const chatLogsDir = path.join(__dirname, 'chat_logs_privados');
 // NUEVO: Asegurar que la carpeta chat_logs exista antes de usarla
 if (!fs.existsSync(chatLogsDir)) {
   fs.mkdirSync(chatLogsDir, { recursive: true });
