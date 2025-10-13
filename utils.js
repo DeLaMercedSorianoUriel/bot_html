@@ -1,9 +1,12 @@
+
+// Al inicio de utils.js
+require('dotenv').config(); // Carga las variables de .env
 const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
 
 // Configuración de la API de Gemini
-const apiKey = 'AIzaSyDAt1S0PuyuG5B3x4NViJFhBUOLp6_v_nM';
+const apiKey = process.env.GEMINI_API_KEY; 
 const modelName = 'gemini-2.0-flash';
 
 // Carpeta para guardar historiales

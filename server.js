@@ -13,7 +13,8 @@ const {
 const os = require('os');
 
 const app = express();
-const port = 3000;
+// por entorno
+const port = process.env.PORT || 3000;
 
 // Variable global para el prompt inicial
 let INITIAL_PROMPT = '';
@@ -58,12 +59,12 @@ function restrictToLocalhost(req, res, next) {
   }
 }
 
-// NUEVA RUTA PRINCIPAL: Redirige siempre la raíz a student-input.html
+// Redirige siempre la raíz a student-input.html
 app.get('/', (req, res) => {
     res.redirect('/student-input.html');
 });
 
-// NUEVO: Método para verificar si se completó student-input.html
+//  Método para verificar si se completó student-input.html
 function ensureStudentInputCompleted(req, res, next) {
   if (req.ip !== '::1' && req.ip !== '127.0.0.1' && req.ip !== '::ffff:127.0.0.1' && !req.session.customFilename) {
     return res.redirect('/student-input.html');
